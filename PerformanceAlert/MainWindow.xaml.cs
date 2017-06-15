@@ -260,10 +260,12 @@ namespace PerformanceAlert {
 
         private void WriteToLog(PerformanceMonitorUpdateEvent state) {
             if (Settings.Default.WriteLogToDisk) {
+                var cpu = state.AverageCPU.ToString().PadLeft(3, ' ');
+                var ram = state.AverageRAM.ToString().PadLeft(5, ' ');
+
                 File.AppendAllLines("PerformanceMonitorLog.txt", new[] {
-                    state.Timestamp.ToShortDateString() + " - CPU: "
-                    + state.AverageCPU + "% - RAM: "
-                    + state.AverageRAM + " RAM" });
+                    state.Timestamp.ToShortDateString() + " - CPU: " + cpu  + "% - RAM: " + ram + " RAM"
+                });
             }
         }
 
