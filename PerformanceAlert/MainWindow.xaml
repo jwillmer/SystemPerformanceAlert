@@ -1,0 +1,90 @@
+﻿<Window x:Class="PerformanceAlert.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PerformanceAlert"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        mc:Ignorable="d"
+        Title="Performance Monitoring Alerts" Height="350" Width="525" ResizeMode="NoResize" Icon="monitor.ico" Topmost="True" Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0">
+            <TabItem Header="Log">
+                <DataGrid x:Name="EventLogGrid" ItemsSource="{Binding Path=Events}" AutoGenerateColumns="False" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Timestamp" Width="*" Binding="{Binding Timestamp}" />
+                        <DataGridTextColumn Header="Average CPU"  Width="*" Binding="{Binding AverageCPU}" />
+                        <DataGridTextColumn Header="Average RAM" Width="*" Binding="{Binding AverageRAM}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Settings">
+                <StackPanel>
+                    <GroupBox Header="Alert Definition">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Measurement time (min)"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertMeasurementTime, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation" Margin="0,0,0,5"></TextBox>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Average CPU over (%)"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareCPU, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation" Margin="0,0,0,5"></TextBox>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Average RAM over (MB)"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareRAM, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation"></TextBox>
+
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Pushbullet">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="2*"></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="API Key"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.PushbulletApiKey, Mode=TwoWay}" Margin="0,0,0,5" ></TextBox>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Device List"/>
+                            <ListBox x:Name="GuiDeviceList" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Path=Devices}" DisplayMemberPath="Nickname" SelectionChanged="SelectedDevicesChanged" SelectionMode="Multiple"/>
+                            <Button Grid.Row="1" Grid.Column="2" Content="Load devices" Click="GetDeviceList" Margin="10,0,0,0" VerticalAlignment="Top"/>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Miscellaneous">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="2*"></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Write log to disk"/>
+                            <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.WriteLogToDisk, Mode=TwoWay}"/>
+                            <Button Grid.Row="0" Grid.Column="3" Content="Open folder" Margin="10,0,0,0" VerticalAlignment="Top" Click="OpenLogFolder"/>
+                        </Grid>
+                    </GroupBox>
+                    
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        <ProgressBar Grid.Row="1" Margin="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsIndeterminate="{Binding Path=IsMonitoring}" />
+    </Grid>
+</Window>
