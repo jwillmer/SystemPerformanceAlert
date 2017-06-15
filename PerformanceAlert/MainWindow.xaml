@@ -59,9 +59,9 @@
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="API Key"/>
                             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.PushbulletApiKey, Mode=TwoWay}" Margin="0,0,0,5" ></TextBox>
+                            <Button Grid.Row="0" Grid.Column="2" Content="Load devices" Click="GetDeviceList" Margin="10,0,0,0" VerticalAlignment="Top"/>
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Device List"/>
                             <ListBox x:Name="GuiDeviceList" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Path=Devices}" DisplayMemberPath="Nickname" SelectionChanged="SelectedDevicesChanged" SelectionMode="Multiple"/>
-                            <Button Grid.Row="1" Grid.Column="2" Content="Load devices" Click="GetDeviceList" Margin="10,0,0,0" VerticalAlignment="Top"/>
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="Miscellaneous">
@@ -81,7 +81,7 @@
                             <Button Grid.Row="0" Grid.Column="3" Content="Open folder" Margin="10,0,0,0" VerticalAlignment="Top" Click="OpenLogFolder"/>
                         </Grid>
                     </GroupBox>
-                    
+
                 </StackPanel>
             </TabItem>
         </TabControl>
