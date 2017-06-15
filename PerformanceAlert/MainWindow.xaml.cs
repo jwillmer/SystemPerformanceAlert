@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 using PerformanceAlert.Properties;
 using PushbulletSharp;
 using PushbulletSharp.Models.Requests;
@@ -9,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +24,7 @@ namespace PerformanceAlert {
         public ObservableCollection<PerformanceMonitorUpdateEvent> Events { get; } = new ObservableCollection<PerformanceMonitorUpdateEvent>();
         public ObservableCollection<Device> Devices { get; } = new ObservableCollection<Device>();
 
-        public bool IsMonitoring { get { return AllSettingsValid(); } }
+        public Observable<bool> IsMonitoring { get; set; } = new Observable<bool>();
 
         private bool HideInsteadOfClose = true;
 
@@ -44,12 +46,20 @@ namespace PerformanceAlert {
             InitDeviceListFromSettings();
             InitSystemTrayIcon();
             InitLogMessages();
+            InitMonitoring();
 
             var interval = 10000; // 10 sec
             var averageFrom = 6; // (10 sec * 6) = 1 min
 
             var counter = new PerformanceMonitor(averageFrom, interval);
             counter.Update += Counter_Update;
+        }
+
+        private void InitMonitoring() {
+            IsMonitoring.Value = AllSettingsValid();
+            Settings.Default.PropertyChanged += (s, e) => {
+                IsMonitoring.Value = AllSettingsValid();
+            };
         }
 
         private void InitSystemTrayIcon() {
@@ -95,7 +105,36 @@ namespace PerformanceAlert {
             if (HideInsteadOfClose) {
                 e.Cancel = true;
                 HideWindow();
+            } else 
+            {
+                var isAutostartActive = IsAutoStartActivated();
+                var runOnStartup = Settings.Default.RunOnSystemStart;
+
+                if (runOnStartup && !isAutostartActive) {
+                    SetAutostart();
+                } else if(!runOnStartup && isAutostartActive) {
+                    DisableAutostart();
+                }
             }
+        }
+
+        private void SetAutostart() {
+            var regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            regKey.SetValue(assembly.GetName().Name, assembly.Location);
+        }
+
+        private void DisableAutostart() {
+            var regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            regKey.DeleteValue(assembly.GetName().Name);
+        }
+
+        private bool IsAutoStartActivated() {
+            var regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            
+            return regKey.GetValue(assembly.GetName().Name) != null;
         }
 
         private void InitDeviceListFromSettings() {

@@ -37,15 +37,15 @@
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Measurement time"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Measurement time" Margin="0,0,0,4"/>
                             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertMeasurementTime, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation" Margin="0,0,0,5"></TextBox>
                             <TextBlock Grid.Row="0" Grid.Column="2" Text="min" Margin="5,0,0,0"/>
                             
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Average CPU over"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Average CPU over" Margin="0,0,0,4"/>
                             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareCPU, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation" Margin="0,0,0,5"></TextBox>
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Margin="5,0,0,0"/>
                            
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Average RAM over"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Average RAM over" Margin="0,0,0,4"/>
                             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareRAM, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation"></TextBox>
                             <TextBlock Grid.Row="2" Grid.Column="2" Text="MB" Margin="5,0,0,0"/>
                         </Grid>
@@ -62,10 +62,10 @@
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="API Key"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="API Key" Margin="0,0,0,4"/>
                             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.PushbulletApiKey, Mode=TwoWay}" Margin="0,0,0,5" ></TextBox>
                             <Button Grid.Row="0" Grid.Column="2" Content="Load devices" Click="GetDeviceList" Margin="10,0,0,0" VerticalAlignment="Top"/>
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Device List"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Device List" Margin="0,0,0,4"/>
                             <ListBox x:Name="GuiDeviceList" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Path=Devices}" DisplayMemberPath="Nickname" SelectionChanged="SelectedDevicesChanged" SelectionMode="Multiple"/>
                         </Grid>
                     </GroupBox>
@@ -84,14 +84,16 @@
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Write log to disk"/>
                             <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.WriteLogToDisk, Mode=TwoWay}"/>
                             <Button Grid.Row="0" Grid.Column="3" Content="Open folder" Margin="10,0,0,0" VerticalAlignment="Top" Click="OpenLogFolder"/>
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Start minimized"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Start minimized" Margin="0,0,0,4"/>
                             <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.StartMinimized, Mode=TwoWay}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Run on system start" Margin="0,0,0,4"/>
+                            <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.RunOnSystemStart, Mode=TwoWay}"/>
                         </Grid>
                     </GroupBox>
 
                 </StackPanel>
             </TabItem>
         </TabControl>
-        <ProgressBar Grid.Row="1" Margin="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsIndeterminate="{Binding Path=IsMonitoring}" />
+        <ProgressBar Grid.Row="1" Margin="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsIndeterminate="{Binding Path=IsMonitoring.Value}" />
     </Grid>
 </Window>
