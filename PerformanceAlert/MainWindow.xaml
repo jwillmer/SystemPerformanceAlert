@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PerformanceAlert"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         mc:Ignorable="d"
-        Title="Performance Monitoring Alerts" Height="350" Width="525" ResizeMode="NoResize" Icon="monitor.ico" Topmost="True" Closing="Window_Closing">
+        Title="Performance Monitoring Alerts" Height="350" Width="525" ResizeMode="NoResize" Icon="monitor.ico" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0">
             <TabItem Header="Log">
-                <DataGrid x:Name="EventLogGrid" ItemsSource="{Binding Path=Events}" AutoGenerateColumns="False" >
+                <DataGrid x:Name="EventLogGrid" ItemsSource="{Binding Path=Events}" AutoGenerateColumns="False" IsReadOnly="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Timestamp" Width="*" Binding="{Binding Timestamp}" />
                         <DataGridTextColumn Header="Average CPU"  Width="*" Binding="{Binding AverageCPU}" />
@@ -30,19 +30,24 @@
                                 <ColumnDefinition></ColumnDefinition>
                                 <ColumnDefinition></ColumnDefinition>
                                 <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Measurement time (min)"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Measurement time"/>
                             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertMeasurementTime, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation" Margin="0,0,0,5"></TextBox>
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Average CPU over (%)"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="min" Margin="5,0,0,0"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Average CPU over"/>
                             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareCPU, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation" Margin="0,0,0,5"></TextBox>
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Average RAM over (MB)"/>
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Margin="5,0,0,0"/>
+                           
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Average RAM over"/>
                             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareRAM, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation"></TextBox>
-
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="MB" Margin="5,0,0,0"/>
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="Pushbullet">
@@ -79,6 +84,8 @@
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Write log to disk"/>
                             <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.WriteLogToDisk, Mode=TwoWay}"/>
                             <Button Grid.Row="0" Grid.Column="3" Content="Open folder" Margin="10,0,0,0" VerticalAlignment="Top" Click="OpenLogFolder"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Start minimized"/>
+                            <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.StartMinimized, Mode=TwoWay}"/>
                         </Grid>
                     </GroupBox>
 

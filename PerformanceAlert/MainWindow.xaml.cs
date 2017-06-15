@@ -37,12 +37,15 @@ namespace PerformanceAlert {
             set { NotificationSent.Add(value); }
         }
 
+        private readonly string LogFileName = "PerformanceMonitorLog.txt";
+
         public MainWindow() {
             InitializeComponent();
             InitDeviceListFromSettings();
             InitSystemTrayIcon();
+            InitLogMessages();
 
-            var interval = 1000; // 10 sec
+            var interval = 10000; // 10 sec
             var averageFrom = 6; // (10 sec * 6) = 1 min
 
             var counter = new PerformanceMonitor(averageFrom, interval);
@@ -63,7 +66,7 @@ namespace PerformanceAlert {
             SystemTrayIcon.ContextMenu.MenuItems.Add("Exit", (s, e) => CloseWindow());
             SystemTrayIcon.ContextMenu.MenuItems.Add("Open", (s, e) => ShowWindow());
 
-            if (AllSettingsValid()) {
+            if (AllSettingsValid() && Settings.Default.StartMinimized) {
                 // start minimized
                 HideWindow();
             }
@@ -263,9 +266,32 @@ namespace PerformanceAlert {
                 var cpu = state.AverageCPU.ToString().PadLeft(3, ' ');
                 var ram = state.AverageRAM.ToString().PadLeft(5, ' ');
 
-                File.AppendAllLines("PerformanceMonitorLog.txt", new[] {
+                File.AppendAllLines(LogFileName, new[] {
+                    // InitLogMessages() is relying on this format!
                     state.Timestamp.ToString() + " - CPU: " + cpu  + "% - RAM: " + ram + " RAM"
                 });
+            }
+        }
+
+        private void InitLogMessages() {
+            var lines = File.ReadLines(LogFileName).Take(50);
+            foreach(var line in lines) {
+                try {
+                    // the log was not intended for this
+                    var cpuStartIdentifier = " - CPU: ";
+                    var ramStartIdentifier = "% - RAM: ";
+                    var dateEndIndex = line.IndexOf(cpuStartIdentifier);
+                    var cpuEndIndex = line.IndexOf(ramStartIdentifier);
+                    var ramEndIndex = line.LastIndexOf(" RAM");
+                    var cpuStartIndex = dateEndIndex + cpuStartIdentifier.Length;
+                    var ramStartIndex = cpuEndIndex + ramStartIdentifier.Length;
+                    var date = line.Substring(0, dateEndIndex);
+                    var cpu = line.Substring(cpuStartIndex, cpuEndIndex - cpuStartIndex);
+                    var ram = line.Substring(ramStartIndex, ramEndIndex - ramStartIndex);
+
+                    Events.Add(new PerformanceMonitorUpdateEvent(int.Parse(cpu), int.Parse(ram), new TimeSpan(), DateTime.Parse(date)));
+                }
+                catch { }
             }
         }
 

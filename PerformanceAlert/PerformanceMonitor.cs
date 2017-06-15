@@ -15,11 +15,15 @@ namespace PerformanceAlert
     /// <seealso cref="System.EventArgs" />
     public class PerformanceMonitorUpdateEvent : EventArgs
     {
-        public PerformanceMonitorUpdateEvent(int averageCPU, int averageRAM, TimeSpan measurementDuration)
-        {
+        public PerformanceMonitorUpdateEvent(int averageCPU, int averageRAM, TimeSpan measurementDuration) 
+            : this(averageCPU, averageRAM, measurementDuration, DateTime.Now){
+        }
+
+        public PerformanceMonitorUpdateEvent(int averageCPU, int averageRAM, TimeSpan measurementDuration, DateTime timestamp) {
             AverageCPU = averageCPU;
             AverageRAM = averageRAM;
             MeasurementDuration = measurementDuration;
+            Timestamp = timestamp;
         }
 
         /// <summary>
@@ -44,7 +48,7 @@ namespace PerformanceAlert
         /// <value>
         /// The record creation.
         /// </value>
-        public DateTime Timestamp { get; } = DateTime.Now;
+        public DateTime Timestamp { get; }
 
         /// <summary>
         /// Gets the duration of the measurement.
