@@ -42,7 +42,7 @@ namespace PerformanceAlert {
             InitDeviceListFromSettings();
             InitSystemTrayIcon();
 
-            var interval = 10000; // 10 sec
+            var interval = 1000; // 10 sec
             var averageFrom = 6; // (10 sec * 6) = 1 min
 
             var counter = new PerformanceMonitor(averageFrom, interval);
@@ -264,7 +264,7 @@ namespace PerformanceAlert {
                 var ram = state.AverageRAM.ToString().PadLeft(5, ' ');
 
                 File.AppendAllLines("PerformanceMonitorLog.txt", new[] {
-                    state.Timestamp.ToShortDateString() + " - CPU: " + cpu  + "% - RAM: " + ram + " RAM"
+                    state.Timestamp.ToString() + " - CPU: " + cpu  + "% - RAM: " + ram + " RAM"
                 });
             }
         }
