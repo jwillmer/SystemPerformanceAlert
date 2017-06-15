@@ -16,9 +16,9 @@
             <TabItem Header="Log">
                 <DataGrid x:Name="EventLogGrid" ItemsSource="{Binding Path=Events}" AutoGenerateColumns="False" IsReadOnly="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Timestamp" Width="*" Binding="{Binding Timestamp}" />
-                        <DataGridTextColumn Header="Average CPU"  Width="*" Binding="{Binding AverageCPU}" />
-                        <DataGridTextColumn Header="Average RAM" Width="*" Binding="{Binding AverageRAM}" />
+                        <DataGridTextColumn Header="Timestamp" Width="*" Binding="{Binding Timestamp}"/>
+                        <DataGridTextColumn Header="Average CPU (%)"  Width="*" Binding="{Binding AverageCPU}" />
+                        <DataGridTextColumn Header="Average RAM (%)" Width="*" Binding="{Binding AverageRAM}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
@@ -47,7 +47,7 @@
                            
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Average RAM over" Margin="0,0,0,4"/>
                             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Source={StaticResource Settings}, Path=Default.AlertAvergareRAM, Mode=TwoWay}" PreviewTextInput="OnlyNumbersTextValidation"></TextBox>
-                            <TextBlock Grid.Row="2" Grid.Column="2" Text="MB" Margin="5,0,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="%" Margin="5,0,0,0"/>
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="Pushbullet">

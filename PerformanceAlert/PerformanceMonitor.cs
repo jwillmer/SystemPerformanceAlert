@@ -67,7 +67,7 @@ namespace PerformanceAlert
         List<float> _availableCPU = new List<float>();
         List<float> _availableRAM = new List<float>();
         PerformanceCounter _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-        PerformanceCounter _ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+        PerformanceCounter _ramCounter = new PerformanceCounter("Memory", "% Committed Bytes In Use");
 
         /// <summary>
         /// Gets the average cpu in percent.
@@ -120,7 +120,7 @@ namespace PerformanceAlert
             _availableCPU.Add(_cpuCounter.NextValue());
             _availableRAM.Add(_ramCounter.NextValue());
 
-            if(_availableCPU.Count() == _averageRotations)
+            if (_availableCPU.Count() == _averageRotations)
             {
                 AverageCPU = (int)(_availableCPU.Sum() / _averageRotations);
                 AverageRAM = (int)(_availableRAM.Sum() / _averageRotations);

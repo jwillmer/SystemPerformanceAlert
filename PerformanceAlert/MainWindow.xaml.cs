@@ -291,23 +291,23 @@ namespace PerformanceAlert {
                 var duration = DateTime.Now.Subtract(LastNotification).TotalMinutes;
                 return "Everything back to normal after " + duration + " min. Average of the last 3 min:" + Environment.NewLine
                 + "CPU: " + GetAverageCpu(3) + "%" + Environment.NewLine
-                + "RAM: " + GetAverageRam(3) + " MB";
+                + "RAM: " + GetAverageRam(3) + "%";
             }
 
             var interval = MeasurementTimeInterval;
             return "Average peak in the last " + interval + " min:" + Environment.NewLine
                 + "CPU: " + GetAverageCpu(interval) + "%" + Environment.NewLine
-                + "RAM: " + GetAverageRam(interval) + " MB";
+                + "RAM: " + GetAverageRam(interval) + "%";
         }
 
         private void WriteToLog(PerformanceMonitorUpdateEvent state) {
             if (Settings.Default.WriteLogToDisk) {
                 var cpu = state.AverageCPU.ToString().PadLeft(3, ' ');
-                var ram = state.AverageRAM.ToString().PadLeft(5, ' ');
+                var ram = state.AverageRAM.ToString().PadLeft(3, ' ');
 
                 File.AppendAllLines(LogFileName, new[] {
                     // InitLogMessages() is relying on this format!
-                    state.Timestamp.ToString() + " - CPU: " + cpu  + "% - RAM: " + ram + " RAM"
+                    state.Timestamp.ToString() + " - CPU: " + cpu  + "% - RAM: " + ram + "%"
                 });
             }
         }
@@ -322,7 +322,7 @@ namespace PerformanceAlert {
                         var ramStartIdentifier = "% - RAM: ";
                         var dateEndIndex = line.IndexOf(cpuStartIdentifier);
                         var cpuEndIndex = line.IndexOf(ramStartIdentifier);
-                        var ramEndIndex = line.LastIndexOf(" RAM");
+                        var ramEndIndex = line.LastIndexOf("%");
                         var cpuStartIndex = dateEndIndex + cpuStartIdentifier.Length;
                         var ramStartIndex = cpuEndIndex + ramStartIdentifier.Length;
                         var date = line.Substring(0, dateEndIndex);
