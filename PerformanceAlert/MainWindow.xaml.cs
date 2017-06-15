@@ -274,24 +274,26 @@ namespace PerformanceAlert {
         }
 
         private void InitLogMessages() {
-            var lines = File.ReadLines(LogFileName).Take(50);
-            foreach(var line in lines) {
-                try {
-                    // the log was not intended for this
-                    var cpuStartIdentifier = " - CPU: ";
-                    var ramStartIdentifier = "% - RAM: ";
-                    var dateEndIndex = line.IndexOf(cpuStartIdentifier);
-                    var cpuEndIndex = line.IndexOf(ramStartIdentifier);
-                    var ramEndIndex = line.LastIndexOf(" RAM");
-                    var cpuStartIndex = dateEndIndex + cpuStartIdentifier.Length;
-                    var ramStartIndex = cpuEndIndex + ramStartIdentifier.Length;
-                    var date = line.Substring(0, dateEndIndex);
-                    var cpu = line.Substring(cpuStartIndex, cpuEndIndex - cpuStartIndex);
-                    var ram = line.Substring(ramStartIndex, ramEndIndex - ramStartIndex);
+            if (File.Exists(LogFileName)) {
+                var lines = File.ReadLines(LogFileName).Take(50);
+                foreach (var line in lines) {
+                    try {
+                        // the log was not intended for this
+                        var cpuStartIdentifier = " - CPU: ";
+                        var ramStartIdentifier = "% - RAM: ";
+                        var dateEndIndex = line.IndexOf(cpuStartIdentifier);
+                        var cpuEndIndex = line.IndexOf(ramStartIdentifier);
+                        var ramEndIndex = line.LastIndexOf(" RAM");
+                        var cpuStartIndex = dateEndIndex + cpuStartIdentifier.Length;
+                        var ramStartIndex = cpuEndIndex + ramStartIdentifier.Length;
+                        var date = line.Substring(0, dateEndIndex);
+                        var cpu = line.Substring(cpuStartIndex, cpuEndIndex - cpuStartIndex);
+                        var ram = line.Substring(ramStartIndex, ramEndIndex - ramStartIndex);
 
-                    Events.Add(new PerformanceMonitorUpdateEvent(int.Parse(cpu), int.Parse(ram), new TimeSpan(), DateTime.Parse(date)));
+                        Events.Add(new PerformanceMonitorUpdateEvent(int.Parse(cpu), int.Parse(ram), new TimeSpan(), DateTime.Parse(date)));
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
 
