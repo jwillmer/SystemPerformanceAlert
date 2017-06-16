@@ -306,13 +306,15 @@ namespace PerformanceAlert {
         private string GetNotification() {
             if (CurrentPeakAlreadyReported() && PeakEnded()) {
                 var duration = Math.Round(DateTime.Now.Subtract(LastPeakNotification).TotalMinutes);
-                return "Everything back to normal after " + duration + " min. Average of the last 3 min:" + Environment.NewLine
+                return DateTime.Now.ToString() + Environment.NewLine
+                + "Everything back to normal after " + duration + " min. Average of the last 3 min:" + Environment.NewLine
                 + "CPU: " + GetAverageCpu(3) + "%" + Environment.NewLine
                 + "RAM: " + GetAverageRam(3) + "%";
             }
 
             var interval = MeasurementTimeInterval;
-            return "Average peak in the last " + interval + " min:" + Environment.NewLine
+            return DateTime.Now.ToString() + Environment.NewLine
+                + "Average peak in the last " + interval + " min:" + Environment.NewLine
                 + "CPU: " + GetAverageCpu(interval) + "%" + Environment.NewLine
                 + "RAM: " + GetAverageRam(interval) + "%";
         }
