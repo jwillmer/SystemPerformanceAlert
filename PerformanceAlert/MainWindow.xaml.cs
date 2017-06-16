@@ -50,7 +50,12 @@ namespace PerformanceAlert {
             InitLogMessages();
             InitMonitoring();
 
-            var interval = 1000; // 10 sec
+            var interval = 10000; // 10 sec
+
+#if DEBUG
+            interval = 1000; // 1 sec
+#endif
+
             var averageFrom = 6; // (10 sec * 6) = 1 min
 
             var counter = new PerformanceMonitor(averageFrom, interval);
