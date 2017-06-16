@@ -32,12 +32,14 @@ namespace PerformanceAlert {
 
         private int MeasurementTimeInterval { get { return Settings.Default.AlertMeasurementTime; } }
 
-        private List<DateTime> NotificationSent { get; } = new List<DateTime>();
+        private List<DateTime> PeakNotificationSent { get; } = new List<DateTime>();
 
-        private DateTime LastNotification {
-            get { return NotificationSent.Any() ? NotificationSent.Last() : new DateTime(); }
-            set { NotificationSent.Add(value); }
+        private DateTime LastPeakNotification {
+            get { return PeakNotificationSent.Any() ? PeakNotificationSent.Last() : new DateTime(); }
+            set { PeakNotificationSent.Add(value); }
         }
+
+        private DateTime LastEndedPeak = new DateTime();
 
         private readonly string LogFileName = "PerformanceMonitorLog.txt";
 
@@ -48,7 +50,7 @@ namespace PerformanceAlert {
             InitLogMessages();
             InitMonitoring();
 
-            var interval = 10000; // 10 sec
+            var interval = 1000; // 10 sec
             var averageFrom = 6; // (10 sec * 6) = 1 min
 
             var counter = new PerformanceMonitor(averageFrom, interval);
@@ -170,15 +172,27 @@ namespace PerformanceAlert {
             if (Events.Count < interval || interval <= 0) { return false; }
 
             var peakReached = PeakReached();
-            if (CurrentPeakAlreadyReported()) {
-                return peakReached ? false : PeakEnded();
+            if (CurrentPeakAlreadyReported() && CurrentPeakEndNotReported()) {
+                var peakEnd = peakReached ? false : PeakEnded();
+                if (peakEnd) {
+                    LastEndedPeak = DateTime.Now;
+                }
+                return peakEnd;
+            }
+
+            if (peakReached) {
+                LastPeakNotification = DateTime.Now;
             }
 
             return peakReached;
         }
 
+        private bool CurrentPeakEndNotReported() {
+            return DateTime.Now.Subtract(LastEndedPeak).TotalMinutes > MeasurementTimeInterval;
+        }
+
         private bool CurrentPeakAlreadyReported() {
-            return DateTime.Now.Subtract(LastNotification).TotalMinutes <= MeasurementTimeInterval;
+            return DateTime.Now.Subtract(LastPeakNotification).TotalMinutes <= MeasurementTimeInterval;
         }
 
         private bool PeakReached() {
@@ -197,11 +211,11 @@ namespace PerformanceAlert {
         }
 
         private int GetAverageCpu(int interval) {
-            return Events.Take(interval).Sum(_ => _.AverageCPU) / interval;
+            return Events.Skip(Math.Max(0, Events.Count() - interval)).Sum(_ => _.AverageCPU) / interval;
         }
 
         private int GetAverageRam(int interval) {
-            return Events.Take(interval).Sum(_ => _.AverageRAM) / interval;
+            return Events.Skip(Math.Max(0, Events.Count() - interval)).Sum(_ => _.AverageRAM) / interval;
         }
 
         private bool CpuOverPeak(int cpu) {
@@ -282,13 +296,11 @@ namespace PerformanceAlert {
                     }
                 }
             }
-
-            LastNotification = DateTime.Now;
         }
 
         private string GetNotification() {
             if (CurrentPeakAlreadyReported() && PeakEnded()) {
-                var duration = DateTime.Now.Subtract(LastNotification).TotalMinutes;
+                var duration = Math.Round(DateTime.Now.Subtract(LastPeakNotification).TotalMinutes);
                 return "Everything back to normal after " + duration + " min. Average of the last 3 min:" + Environment.NewLine
                 + "CPU: " + GetAverageCpu(3) + "%" + Environment.NewLine
                 + "RAM: " + GetAverageRam(3) + "%";
@@ -355,6 +367,8 @@ namespace PerformanceAlert {
                     Settings.Default.SelectedDevices.Add(json);
                 }
             }
+
+            IsMonitoring.Value = AllSettingsValid();
         }
 
         private void OnlyNumbersTextValidation(object sender, TextCompositionEventArgs e) {
