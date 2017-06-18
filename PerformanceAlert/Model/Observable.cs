@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PerformanceAlert {
+namespace PerformanceAlert.Model {
     public class Observable<T> : INotifyPropertyChanged {
         private T value;
 
