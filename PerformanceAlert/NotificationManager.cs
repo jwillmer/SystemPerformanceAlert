@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace PerformanceAlert {
     public class NotificationManager {
-        public IEnumerable<AlertDefinition> AlertDefinitions;
+        public List<AlertDefinition> AlertDefinitions;
 
         private List<PerformanceMonitorUpdateEvent> Events = new List<PerformanceMonitorUpdateEvent>();
         private List<Report> Reports = new List<Report>();
 
         public NotificationManager(IEnumerable<AlertDefinition> alertDefinitions) {
-            AlertDefinitions = alertDefinitions;
+            AlertDefinitions = alertDefinitions.ToList();
         }
 
         public void Update(PerformanceMonitorUpdateEvent item) {

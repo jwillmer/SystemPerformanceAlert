@@ -80,7 +80,7 @@
     <Compile Include="Interface\INotificationProvider.cs" />
     <Compile Include="Model\GenericDevice.cs" />
     <Compile Include="NotificationManager.cs" />
-    <Compile Include="PerformanceMonitorUpdateEvent.cs" />
+    <Compile Include="Model\PerformanceMonitorUpdateEvent.cs" />
     <Compile Include="Model\Notification.cs" />
     <Compile Include="PushbulletNotificationProvider.cs" />
     <Compile Include="Model\Report.cs" />

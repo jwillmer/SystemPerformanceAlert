@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceAlert", "PerformanceAlert\PerformanceAlert.csproj", "{2749153A-20DB-4036-8795-9C91F46A9E93}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceAlertTests", "PerformanceAlertTests\PerformanceAlertTests.csproj", "{D41ACC54-47D9-4550-949E-777ACFC36E73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{2749153A-20DB-4036-8795-9C91F46A9E93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2749153A-20DB-4036-8795-9C91F46A9E93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2749153A-20DB-4036-8795-9C91F46A9E93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D41ACC54-47D9-4550-949E-777ACFC36E73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D41ACC54-47D9-4550-949E-777ACFC36E73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D41ACC54-47D9-4550-949E-777ACFC36E73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D41ACC54-47D9-4550-949E-777ACFC36E73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
