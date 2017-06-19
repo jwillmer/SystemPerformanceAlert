@@ -36,9 +36,9 @@ namespace PerformanceAlertTests {
             int v1 = 35,
                 v2 = 60,
                 v3 = 25;
-            var eventT1 = new PerformanceMonitorUpdateEvent(v1, 0, new TimeSpan());
-            var eventT2 = new PerformanceMonitorUpdateEvent(v2, 1, new TimeSpan());
-            var eventT3 = new PerformanceMonitorUpdateEvent(v3, 2, new TimeSpan());
+            var eventT1 = new PerformanceState() { AverageCPU = v1 };
+            var eventT2 = new PerformanceState() { AverageCPU = v2 };
+            var eventT3 = new PerformanceState() { AverageCPU = v3 };
 
             manager.Update(eventT1);
             manager.Update(eventT2);
@@ -69,7 +69,7 @@ namespace PerformanceAlertTests {
             var manager = new NotificationManager(new[] { definition });
 
             notificationProviderMock.Setup(_ => _.Notify(It.IsAny<Notification>(), definition.NotifyDeviceIds)).Verifiable();
-            
+
             PrivateObject obj = new PrivateObject(manager);
             obj.Invoke("Notify", new object[] { new Notification(), definition });
 
@@ -82,13 +82,13 @@ namespace PerformanceAlertTests {
             var definitions = new List<AlertDefinition>();
             NotificationManager manager = new NotificationManager(definitions);
 
-            var eventT1 = new PerformanceMonitorUpdateEvent(0, 0, new TimeSpan());
-            var eventT2 = new PerformanceMonitorUpdateEvent(1, 1, new TimeSpan());
-            var eventT3 = new PerformanceMonitorUpdateEvent(2, 2, new TimeSpan());
+            var eventT1 = new PerformanceState();
+            var eventT2 = new PerformanceState();
+            var eventT3 = new PerformanceState();
 
 
-            var prop = manager.GetType().GetField("Events", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var eventList = (List<PerformanceMonitorUpdateEvent>)prop.GetValue(manager);
+            var prop = manager.GetType().GetField("PerformanceStateList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var eventList = (List<IPerformanceState>)prop.GetValue(manager);
 
             Assert.IsTrue(eventList.Count() == 0);
 
@@ -107,9 +107,9 @@ namespace PerformanceAlertTests {
             int v1 = 35,
                 v2 = 60,
                 v3 = 25;
-            var eventT1 = new PerformanceMonitorUpdateEvent(0, v1, new TimeSpan());
-            var eventT2 = new PerformanceMonitorUpdateEvent(1, v2, new TimeSpan());
-            var eventT3 = new PerformanceMonitorUpdateEvent(2, v3, new TimeSpan());
+            var eventT1 = new PerformanceState() { AverageRAM = v1 };
+            var eventT2 = new PerformanceState() { AverageRAM = v2 };
+            var eventT3 = new PerformanceState() { AverageRAM = v3 };
 
             manager.Update(eventT1);
             manager.Update(eventT2);
@@ -141,7 +141,7 @@ namespace PerformanceAlertTests {
                 average1 = 59,
                 average2 = current,
                 average3 = 61;
-            var eventT1 = new PerformanceMonitorUpdateEvent(0, current, new TimeSpan());
+            var eventT1 = new PerformanceState() { AverageRAM = current };
 
             manager.Update(eventT1);
 
@@ -183,7 +183,7 @@ namespace PerformanceAlertTests {
                 average1 = 59,
                 average2 = current,
                 average3 = 61;
-            var eventT1 = new PerformanceMonitorUpdateEvent(current, 0, new TimeSpan());
+            var eventT1 = new PerformanceState() { AverageCPU = current };
 
             manager.Update(eventT1);
 

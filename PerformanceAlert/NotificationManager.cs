@@ -11,7 +11,7 @@ namespace PerformanceAlert {
     public class NotificationManager {
         public List<AlertDefinition> AlertDefinitions;
 
-        private List<IPerformanceState> Events = new List<IPerformanceState>();
+        private List<IPerformanceState> PerformanceStateList = new List<IPerformanceState>();
         private List<Report> Reports = new List<Report>();
 
         public NotificationManager(IEnumerable<AlertDefinition> alertDefinitions) {
@@ -19,7 +19,7 @@ namespace PerformanceAlert {
         }
 
         public void Update(IPerformanceState item) {
-            Events.Add(item);
+            PerformanceStateList.Add(item);
 
             foreach (var definition in AlertDefinitions) {
                 if (TriggerPeakStartNotification(definition)) {
@@ -85,7 +85,7 @@ namespace PerformanceAlert {
 
         private bool TriggerPeakEndNotification(AlertDefinition definition) {
             var interval = definition.MeasurementTime;
-            if (Events.Count < interval || interval <= 0) { return false; }
+            if (PerformanceStateList.Count < interval || interval <= 0) { return false; }
 
             var peakReached = PeakReached(definition, interval);
             if (peakReached) {
@@ -101,7 +101,7 @@ namespace PerformanceAlert {
 
         private bool TriggerPeakStartNotification(AlertDefinition definition) {
             var interval = definition.MeasurementTime;
-            if (Events.Count < interval || interval <= 0) { return false; }
+            if (PerformanceStateList.Count < interval || interval <= 0) { return false; }
 
             var peakReached = PeakReached(definition, interval);
             if (!peakReached) {
@@ -123,11 +123,11 @@ namespace PerformanceAlert {
         }
 
         private int GetAverageCpu(int interval) {
-            return Events.Skip(Math.Max(0, Events.Count() - interval)).Sum(_ => _.AverageCPU) / interval;
+            return PerformanceStateList.Skip(Math.Max(0, PerformanceStateList.Count() - interval)).Sum(_ => _.AverageCPU) / interval;
         }
 
         private int GetAverageRam(int interval) {
-            return Events.Skip(Math.Max(0, Events.Count() - interval)).Sum(_ => _.AverageRAM) / interval;
+            return PerformanceStateList.Skip(Math.Max(0, PerformanceStateList.Count() - interval)).Sum(_ => _.AverageRAM) / interval;
         }
 
         private bool CpuOverPeak(int averageCpu, int cpu) {

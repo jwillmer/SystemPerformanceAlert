@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0">
             <TabItem Header="Log">
-                <DataGrid x:Name="EventLogGrid" ItemsSource="{Binding Path=Events}" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid x:Name="EventLogGrid" ItemsSource="{Binding Path=PerformanceStateList}" AutoGenerateColumns="False" IsReadOnly="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Timestamp" Width="*" Binding="{Binding Timestamp}"/>
                         <DataGridTextColumn Header="Average CPU (%)"  Width="*" Binding="{Binding AverageCPU}" />

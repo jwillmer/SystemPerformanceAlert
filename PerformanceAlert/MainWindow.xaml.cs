@@ -27,7 +27,7 @@ namespace PerformanceAlert {
         private NotificationManager NotificationManager;
 
 
-        public ObservableCollection<PerformanceState> Events { get; } = new ObservableCollection<PerformanceState>();
+        public ObservableCollection<PerformanceState> PerformanceStateList { get; } = new ObservableCollection<PerformanceState>();
         public ObservableCollection<IDevice> Devices { get; } = new ObservableCollection<IDevice>();
 
         public Observable<bool> IsMonitoring { get; set; } = new Observable<bool>();
@@ -140,8 +140,8 @@ namespace PerformanceAlert {
                 }
 
                 // last 50 entrys
-                foreach (var entry in list.Skip(Math.Max(0, Events.Count() - 50))) {
-                    Events.Add(entry);
+                foreach (var entry in list.Skip(Math.Max(0, PerformanceStateList.Count() - 50))) {
+                    PerformanceStateList.Add(entry);
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace PerformanceAlert {
         private void Counter_Update(object sender, EventArgs e) {
             Application.Current.Dispatcher.BeginInvoke(new Action(() => {
                 var state = e as PerformanceMonitorUpdateEvent;
-                var entry = PerformanceState.FromPerformanceMonitorUpdateEvent(state);
+                var entry = Model.PerformanceState.FromPerformanceMonitorUpdateEvent(state);
 
                 UpdateGuiLogPreview(entry);
                 UpdateXmlLog();
@@ -282,17 +282,17 @@ namespace PerformanceAlert {
             if (Settings.Default.WriteLogToDisk) {
                 var xml = new XmlSerializer(typeof(List<PerformanceState>));    
                 using (var stream = File.Open(LogFileName, FileMode.OpenOrCreate)) {                 
-                    xml.Serialize(stream, Events.ToList());
+                    xml.Serialize(stream, PerformanceStateList.ToList());
                 }
             }
         }
 
         private void UpdateGuiLogPreview(PerformanceState state) {
-            Events.Add(state);
+            PerformanceStateList.Add(state);
 
-            if (Events.Count > 50 && Events.Count > MeasurementTimeInterval) {
+            if (PerformanceStateList.Count > 50 && PerformanceStateList.Count > MeasurementTimeInterval) {
                 // keep the GUI list small
-                Events.RemoveAt(0);
+                PerformanceStateList.RemoveAt(0);
             }
         }
 
