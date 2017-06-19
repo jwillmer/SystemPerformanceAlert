@@ -75,13 +75,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Interface\IPerformanceState.cs" />
     <Compile Include="Model\AlertDefinition.cs" />
     <Compile Include="Interface\IDevice.cs" />
     <Compile Include="Interface\INotificationProvider.cs" />
     <Compile Include="Model\GenericDevice.cs" />
+    <Compile Include="Model\PerformanceState.cs" />
+    <Compile Include="Model\ProcessState.cs" />
     <Compile Include="NotificationManager.cs" />
     <Compile Include="Model\PerformanceMonitorUpdateEvent.cs" />
     <Compile Include="Model\Notification.cs" />
+    <Compile Include="ProcessMonitor.cs" />
     <Compile Include="PushbulletNotificationProvider.cs" />
     <Compile Include="Model\Report.cs" />
     <Page Include="MainWindow.xaml">

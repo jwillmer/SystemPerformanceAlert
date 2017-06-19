@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml.Serialization;
 
 namespace PerformanceAlert {
     /// <summary>
@@ -26,7 +27,7 @@ namespace PerformanceAlert {
         private NotificationManager NotificationManager;
 
 
-        public ObservableCollection<PerformanceMonitorUpdateEvent> Events { get; } = new ObservableCollection<PerformanceMonitorUpdateEvent>();
+        public ObservableCollection<PerformanceState> Events { get; } = new ObservableCollection<PerformanceState>();
         public ObservableCollection<IDevice> Devices { get; } = new ObservableCollection<IDevice>();
 
         public Observable<bool> IsMonitoring { get; set; } = new Observable<bool>();
@@ -37,7 +38,7 @@ namespace PerformanceAlert {
 
         private int MeasurementTimeInterval { get { return Settings.Default.AlertMeasurementTime; } }
 
-        private readonly string LogFileName = "PerformanceMonitorLog.txt";
+        private readonly string LogFileName = "PerformanceMonitorLog.xml";
 
         public MainWindow() {
             InitializeComponent();
@@ -132,24 +133,15 @@ namespace PerformanceAlert {
 
         private void InitLogMessages() {
             if (File.Exists(LogFileName)) {
-                var lines = File.ReadLines(LogFileName).Take(50);
-                foreach (var line in lines) {
-                    try {
-                        // the log was not intended for this
-                        var cpuStartIdentifier = " - CPU: ";
-                        var ramStartIdentifier = "% - RAM: ";
-                        var dateEndIndex = line.IndexOf(cpuStartIdentifier);
-                        var cpuEndIndex = line.IndexOf(ramStartIdentifier);
-                        var ramEndIndex = line.LastIndexOf("%");
-                        var cpuStartIndex = dateEndIndex + cpuStartIdentifier.Length;
-                        var ramStartIndex = cpuEndIndex + ramStartIdentifier.Length;
-                        var date = line.Substring(0, dateEndIndex);
-                        var cpu = line.Substring(cpuStartIndex, cpuEndIndex - cpuStartIndex);
-                        var ram = line.Substring(ramStartIndex, ramEndIndex - ramStartIndex);
+                var xml = new XmlSerializer(typeof(List<PerformanceState>));
+                List<PerformanceState> list;
+                using (var stream = File.OpenRead(LogFileName)) {
+                    list = xml.Deserialize(stream) as List<PerformanceState>;                  
+                }
 
-                        Events.Add(new PerformanceMonitorUpdateEvent(int.Parse(cpu), int.Parse(ram), new TimeSpan(), DateTime.Parse(date)));
-                    }
-                    catch { }
+                // last 50 entrys
+                foreach (var entry in list.Skip(Math.Max(0, Events.Count() - 50))) {
+                    Events.Add(entry);
                 }
             }
         }
@@ -157,9 +149,11 @@ namespace PerformanceAlert {
         private void Counter_Update(object sender, EventArgs e) {
             Application.Current.Dispatcher.BeginInvoke(new Action(() => {
                 var state = e as PerformanceMonitorUpdateEvent;
-                UpdateLogPreview(state);
-                WriteToLog(state);
-                NotificationManager.Update(state);
+                var entry = PerformanceState.FromPerformanceMonitorUpdateEvent(state);
+
+                UpdateGuiLogPreview(entry);
+                UpdateXmlLog();
+                NotificationManager.Update(entry);
             }));
         }
 
@@ -284,19 +278,16 @@ namespace PerformanceAlert {
             return true;
         }
 
-        private void WriteToLog(PerformanceMonitorUpdateEvent state) {
+        private void UpdateXmlLog() {
             if (Settings.Default.WriteLogToDisk) {
-                var cpu = state.AverageCPU.ToString().PadLeft(3, ' ');
-                var ram = state.AverageRAM.ToString().PadLeft(3, ' ');
-
-                File.AppendAllLines(LogFileName, new[] {
-                    // InitLogMessages() is relying on this format!
-                    state.Timestamp.ToString() + " - CPU: " + cpu  + "% - RAM: " + ram + "%"
-                });
+                var xml = new XmlSerializer(typeof(List<PerformanceState>));    
+                using (var stream = File.Open(LogFileName, FileMode.OpenOrCreate)) {                 
+                    xml.Serialize(stream, Events.ToList());
+                }
             }
         }
 
-        private void UpdateLogPreview(PerformanceMonitorUpdateEvent state) {
+        private void UpdateGuiLogPreview(PerformanceState state) {
             Events.Add(state);
 
             if (Events.Count > 50 && Events.Count > MeasurementTimeInterval) {

@@ -1,4 +1,5 @@
-﻿using PerformanceAlert.Model;
+﻿using PerformanceAlert.Interface;
+using PerformanceAlert.Model;
 using PerformanceAlert.Properties;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,14 @@ namespace PerformanceAlert {
     public class NotificationManager {
         public List<AlertDefinition> AlertDefinitions;
 
-        private List<PerformanceMonitorUpdateEvent> Events = new List<PerformanceMonitorUpdateEvent>();
+        private List<IPerformanceState> Events = new List<IPerformanceState>();
         private List<Report> Reports = new List<Report>();
 
         public NotificationManager(IEnumerable<AlertDefinition> alertDefinitions) {
             AlertDefinitions = alertDefinitions.ToList();
         }
 
-        public void Update(PerformanceMonitorUpdateEvent item) {
+        public void Update(IPerformanceState item) {
             Events.Add(item);
 
             foreach (var definition in AlertDefinitions) {
