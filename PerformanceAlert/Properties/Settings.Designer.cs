@@ -86,18 +86,6 @@ namespace PerformanceAlert.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int AlertAvergareRAM {
-            get {
-                return ((int)(this["AlertAvergareRAM"]));
-            }
-            set {
-                this["AlertAvergareRAM"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool StartMinimized {
             get {
@@ -117,6 +105,18 @@ namespace PerformanceAlert.Properties {
             }
             set {
                 this["RunOnSystemStart"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public int AlertAvergareRAM {
+            get {
+                return ((int)(this["AlertAvergareRAM"]));
+            }
+            set {
+                this["AlertAvergareRAM"] = value;
             }
         }
     }
