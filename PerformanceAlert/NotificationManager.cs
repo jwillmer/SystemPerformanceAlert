@@ -10,12 +10,14 @@ using System.Threading.Tasks;
 namespace PerformanceAlert {
     public class NotificationManager {
         public List<AlertDefinition> AlertDefinitions;
+        private ProcessMonitor ProcessMonitor;
 
         private List<IPerformanceState> PerformanceStateList = new List<IPerformanceState>();
         private List<Report> Reports = new List<Report>();
 
-        public NotificationManager(IEnumerable<AlertDefinition> alertDefinitions) {
+        public NotificationManager(IEnumerable<AlertDefinition> alertDefinitions, ProcessMonitor processMonitor) {
             AlertDefinitions = alertDefinitions.ToList();
+            ProcessMonitor = processMonitor;
         }
 
         public void Update(IPerformanceState item) {
@@ -54,11 +56,12 @@ namespace PerformanceAlert {
             return Reports.Where(_ => _.AlertDefinitionId == definitionId).FirstOrDefault(_ => !_.IsClosed);
         }           
 
-        private Notification CreatePeakStartNotification(AlertDefinition definition) {
+        private Notification CreatePeakStartNotification(AlertDefinition definition) {  
             var notification = new Notification();
             var interval = definition.MeasurementTime;
             var body = DateTime.Now.ToString() + Environment.NewLine
                 + "Average peak in the last " + interval + " min:" + Environment.NewLine
+                + GetProcessNotificationLine(definition)
                 + "CPU: " + GetAverageCpu(interval) + "%" + Environment.NewLine
                 + "RAM: " + GetAverageRam(interval) + "%";
 
@@ -66,6 +69,24 @@ namespace PerformanceAlert {
             notification.Body = body;
 
             return notification;
+        }
+
+        private string GetProcessNotificationLine(AlertDefinition definition) {
+            if (definition.IncludeProcess) {
+                var interval = definition.MeasurementTime;
+                var averageCPU = GetAverageCpu(interval);
+
+                SystemUsage usage;
+                if (CpuOverPeak(definition.AvergareCPU, averageCPU)) {
+                    usage = ProcessMonitor.GetHighestCpuProcess(interval);
+                } else {
+                    usage = ProcessMonitor.GetHighestRamProcess(interval);
+                }
+
+                return "Process: " + usage.Name + " CPU: " + usage.Cpu + "% RAM: " + usage.Ram + "%" + Environment.NewLine;
+            }
+
+            return string.Empty;
         }
 
         private Notification CreatePeakEndNotification(DateTime peakStartTimestamp) {

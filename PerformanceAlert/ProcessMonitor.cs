@@ -8,30 +8,44 @@ using System.Threading.Tasks;
 
 namespace PerformanceAlert {
     public class ProcessMonitor {
-        PerformanceCounter _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-        PerformanceCounter _memoryCounter = new PerformanceCounter("Memory", "Available MBytes");
+        public List<ProcessStatistics> ProcessStatistics = new List<ProcessStatistics>();
 
-        public void GetProcess() {
-            var list = new List<ProcessState>();
+        public void UpdateProcessStatistics() {
+            CleanProcessStatistics();
 
             foreach (var process in Process.GetProcesses()) {
-                var cpuPercent = GetProcessCpuUsagePercent(process.ProcessName);
-                var ramPercent = GetProcessRamUsagePercent(process.ProcessName);
-            }     
-        }
+                ProcessStatistics stat = ProcessStatistics.FirstOrDefault(_ => _.Id == process.Id);
 
-        private float GetProcessCpuUsagePercent(string processName) {
-            var processCounter = new PerformanceCounter("Process", "% Processor Time", processName);
-            var processCpuUsage = (_cpuCounter.NextValue() / 100) * processCounter.NextValue();
-            return processCpuUsage / Environment.ProcessorCount;
-
-        }
-
-        private float GetProcessRamUsagePercent(string processName) {
-            using (var processCounter = new PerformanceCounter("Process", "Working Set - Private", processName)) {
-                var processWorkingSetMb = Convert.ToInt32(processCounter.NextValue()) / (int)(1024);
-                return processWorkingSetMb * (_memoryCounter.NextValue() / 100);
+                if (stat == null) {
+                    stat = new ProcessStatistics(process);
+                    ProcessStatistics.Add(stat);
+                }
+                stat.Update();
             }
         }
+
+        private void CleanProcessStatistics() {
+            ProcessStatistics.RemoveAll(_ => _.ProcessHasExited);
+        }
+
+        public SystemUsage GetHighestRamProcess(int averageFromEntrys = 6) {
+            if (!ProcessStatistics.Any()) return null;
+
+            var process = ProcessStatistics.OrderBy(_ => _.GetAverageRam(averageFromEntrys)).FirstOrDefault();
+            var ram = process.GetAverageRam(averageFromEntrys);
+            var cpu = process.GetAverageCpu(averageFromEntrys);
+
+            return new SystemUsage(process.Id, process.Name, cpu, ram);
+        }
+
+        public SystemUsage GetHighestCpuProcess(int averageFromEntrys = 6) {
+            if (!ProcessStatistics.Any()) return null;
+
+            var process = ProcessStatistics.OrderBy(_ => _.GetAverageCpu(averageFromEntrys)).FirstOrDefault();
+            var ram = process.GetAverageRam(averageFromEntrys);
+            var cpu = process.GetAverageCpu(averageFromEntrys);
+
+            return new SystemUsage(process.Id, process.Name, cpu, ram);
+        }      
     }
 }

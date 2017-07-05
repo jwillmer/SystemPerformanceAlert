@@ -27,5 +27,6 @@ namespace PerformanceAlert.Model {
         public int AvergareCPU { get; set; }
 
         public int AvergareRAM { get; set; }
+        public bool IncludeProcess { get; set; }
     }
 }

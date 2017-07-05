@@ -27,5 +27,8 @@
     <Setting Name="AlertAvergareRAM" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60</Value>
     </Setting>
+    <Setting Name="MonitorProcesses" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

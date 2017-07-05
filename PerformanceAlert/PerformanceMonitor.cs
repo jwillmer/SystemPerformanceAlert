@@ -8,12 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace PerformanceAlert
-{   
-    public class PerformanceMonitor
-    {
+namespace PerformanceAlert {
+    public class PerformanceMonitor {
         int _averageRotations;
-        double _interval; 
+        double _interval;
 
         List<float> _availableCPU = new List<float>();
         List<float> _availableRAM = new List<float>();
@@ -50,12 +48,16 @@ namespace PerformanceAlert
         public event EventHandler Update;
 
         /// <summary>
+        /// Occurs when [update].
+        /// </summary>
+        public event EventHandler Monitoring;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PerformanceMonitor"/> class.
         /// </summary>
         /// <param name="averageFrom">The number of logs that are used to calculate the average.</param>
         /// <param name="interval">The log interval in milliseconds.</param>
-        public PerformanceMonitor(int averageFrom = 6, double interval = 10000)
-        {
+        public PerformanceMonitor(int averageFrom = 6, double interval = 10000) {
             _averageRotations = averageFrom;
             _interval = interval;
             MeasurementDuration = TimeSpan.FromMilliseconds(_averageRotations * _interval);
@@ -66,13 +68,12 @@ namespace PerformanceAlert
             timer.Start();
         }
 
-        void TimerElapsed(object source, ElapsedEventArgs e)
-        {
+        void TimerElapsed(object source, ElapsedEventArgs e) {
+            Monitoring?.Invoke(this, null);
             _availableCPU.Add(_cpuCounter.NextValue());
-            _availableRAM.Add(_ramCounter.NextValue());
+            _availableRAM.Add(_ramCounter.NextValue());            
 
-            if (_availableCPU.Count() == _averageRotations)
-            {
+            if (_availableCPU.Count() == _averageRotations) {
                 AverageCPU = (int)(_availableCPU.Sum() / _averageRotations);
                 AverageRAM = (int)(_availableRAM.Sum() / _averageRotations);
 
@@ -83,8 +84,7 @@ namespace PerformanceAlert
             }
         }
 
-        void UpdateEventHandler()
-        {            
+        void UpdateEventHandler() {
             Update?.Invoke(this, new PerformanceMonitorUpdateEvent(AverageCPU, AverageRAM, MeasurementDuration));
         }
     }

@@ -23,7 +23,7 @@ namespace PerformanceAlertTests {
                 new AlertDefinition(NotificationProviderMock.Object),
                 new AlertDefinition(NotificationProviderMock.Object)
             };
-            var manager = new NotificationManager(definitions);
+            var manager = new NotificationManager(definitions,null );
 
             Assert.IsTrue(manager.AlertDefinitions.Count() == 2);
         }
@@ -31,7 +31,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void GetAverageCpuTest() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             int v1 = 35,
                 v2 = 60,
@@ -66,7 +66,7 @@ namespace PerformanceAlertTests {
             var notificationProviderMock = new Mock<INotificationProvider>();
             var definition = new AlertDefinition(notificationProviderMock.Object);
             definition.NotifyDeviceIds.AddRange(new[] { "1", "2", "3" });
-            var manager = new NotificationManager(new[] { definition });
+            var manager = new NotificationManager(new[] { definition }, null);
 
             notificationProviderMock.Setup(_ => _.Notify(It.IsAny<Notification>(), definition.NotifyDeviceIds)).Verifiable();
 
@@ -80,7 +80,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void UpdateEventListTest() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             var eventT1 = new PerformanceState();
             var eventT2 = new PerformanceState();
@@ -102,7 +102,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void GetAverageRamTest() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             int v1 = 35,
                 v2 = 60,
@@ -135,7 +135,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void RamPeakReachedTest() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             int current = 60,
                 average1 = 59,
@@ -177,7 +177,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void CpuPeakReachedTest() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             int current = 60,
                 average1 = 59,
@@ -219,7 +219,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void PeakReportedTest_Closed() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             var definitionId = Guid.NewGuid();
             var reports = new List<Report>() {
@@ -246,7 +246,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void PeakReportedTest_Open() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             var definitionId = Guid.NewGuid();
             var reports = new List<Report>() {
@@ -270,7 +270,7 @@ namespace PerformanceAlertTests {
         [TestMethod]
         public void GenerateNewReportTest() {
             var definitions = new List<AlertDefinition>();
-            NotificationManager manager = new NotificationManager(definitions);
+            NotificationManager manager = new NotificationManager(definitions, null);
 
             var prop = manager.GetType().GetField("Reports", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var reportList = (List<Report>)prop.GetValue(manager);

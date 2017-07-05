@@ -119,5 +119,17 @@ namespace PerformanceAlert.Properties {
                 this["AlertAvergareRAM"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MonitorProcesses {
+            get {
+                return ((bool)(this["MonitorProcesses"]));
+            }
+            set {
+                this["MonitorProcesses"] = value;
+            }
+        }
     }
 }

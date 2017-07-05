@@ -81,7 +81,8 @@
     <Compile Include="Interface\INotificationProvider.cs" />
     <Compile Include="Model\GenericDevice.cs" />
     <Compile Include="Model\PerformanceState.cs" />
-    <Compile Include="Model\ProcessState.cs" />
+    <Compile Include="Model\SystemUsage.cs" />
+    <Compile Include="Model\ProcessStatistics.cs" />
     <Compile Include="NotificationManager.cs" />
     <Compile Include="Model\PerformanceMonitorUpdateEvent.cs" />
     <Compile Include="Model\Notification.cs" />

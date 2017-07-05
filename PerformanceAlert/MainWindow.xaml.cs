@@ -25,6 +25,7 @@ namespace PerformanceAlert {
     /// </summary>
     public partial class MainWindow : Window {
         private NotificationManager NotificationManager;
+        private ProcessMonitor ProcessMonitor;
 
 
         public ObservableCollection<PerformanceState> PerformanceStateList { get; } = new ObservableCollection<PerformanceState>();
@@ -43,6 +44,7 @@ namespace PerformanceAlert {
         public MainWindow() {
             InitializeComponent();
             InitNotificationManager();
+            InitProcessMonitor();
             InitSettingsMonitoring();
             InitDeviceListFromSettings();
 
@@ -57,6 +59,11 @@ namespace PerformanceAlert {
 
             var counter = new PerformanceMonitor(averageFrom, interval);
             counter.Update += Counter_Update;
+            counter.Monitoring += Counter_Monitoring;
+        }
+
+        private void InitProcessMonitor() {
+            ProcessMonitor = new ProcessMonitor();
         }
 
         private void InitNotificationManager() {
@@ -67,7 +74,7 @@ namespace PerformanceAlert {
             definition.AvergareRAM = Settings.Default.AlertAvergareRAM;
             definition.MeasurementTime = Settings.Default.AlertMeasurementTime;
 
-            NotificationManager = new NotificationManager(new[] { definition });
+            NotificationManager = new NotificationManager(new[] { definition }, ProcessMonitor);
         }
 
         private void InitSettingsMonitoring() {
@@ -89,6 +96,9 @@ namespace PerformanceAlert {
                         break;
                     case "AlertAvergareRAM":
                         alertDefinition.AvergareRAM = (int)value;
+                        break;
+                    case "MonitorProcesses":
+                        alertDefinition.IncludeProcess = (bool)value;
                         break;
                 }
 
@@ -136,7 +146,7 @@ namespace PerformanceAlert {
                 var xml = new XmlSerializer(typeof(List<PerformanceState>));
                 List<PerformanceState> list;
                 using (var stream = File.OpenRead(LogFileName)) {
-                    list = xml.Deserialize(stream) as List<PerformanceState>;                  
+                    list = xml.Deserialize(stream) as List<PerformanceState>;
                 }
 
                 // last 50 entrys
@@ -146,7 +156,16 @@ namespace PerformanceAlert {
             }
         }
 
+        private void Counter_Monitoring(object sender, EventArgs e) {
+          
+        }
+
         private void Counter_Update(object sender, EventArgs e) {
+            if (Settings.Default.MonitorProcesses) {
+                // only get it once a minute since it is CPU intensive
+                ProcessMonitor.UpdateProcessStatistics();
+            }
+
             Application.Current.Dispatcher.BeginInvoke(new Action(() => {
                 var state = e as PerformanceMonitorUpdateEvent;
                 var entry = Model.PerformanceState.FromPerformanceMonitorUpdateEvent(state);
@@ -154,7 +173,7 @@ namespace PerformanceAlert {
                 UpdateGuiLogPreview(entry);
                 UpdateXmlLog();
                 NotificationManager.Update(entry);
-            }));
+        }));
         }
 
         #region Handle Window State
@@ -280,8 +299,8 @@ namespace PerformanceAlert {
 
         private void UpdateXmlLog() {
             if (Settings.Default.WriteLogToDisk) {
-                var xml = new XmlSerializer(typeof(List<PerformanceState>));    
-                using (var stream = File.Open(LogFileName, FileMode.OpenOrCreate)) {                 
+                var xml = new XmlSerializer(typeof(List<PerformanceState>));
+                using (var stream = File.Open(LogFileName, FileMode.OpenOrCreate)) {
                     xml.Serialize(stream, PerformanceStateList.ToList());
                 }
             }

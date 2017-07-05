@@ -80,6 +80,7 @@
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Write log to disk"/>
                             <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.WriteLogToDisk, Mode=TwoWay}"/>
@@ -88,6 +89,8 @@
                             <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.StartMinimized, Mode=TwoWay}"/>
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Run on system start" Margin="0,0,0,4"/>
                             <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.RunOnSystemStart, Mode=TwoWay}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Monitor Processes" Margin="0,0,0,4"/>
+                            <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.MonitorProcesses, Mode=TwoWay}" IsEnabled="False"/>
                         </Grid>
                     </GroupBox>
 
