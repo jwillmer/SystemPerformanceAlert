@@ -78,7 +78,7 @@ namespace PerformanceAlert {
                 if (Settings.Default.MonitorProcesses) {
                     ChangeProcessMonitorState(true);
                 }
-            }           
+            }
         }
 
         private void InitNotificationManager() {
@@ -159,15 +159,20 @@ namespace PerformanceAlert {
 
         private void InitLogMessages() {
             if (File.Exists(_logFileName)) {
-                var xml = new XmlSerializer(typeof(List<PerformanceState>));
-                List<PerformanceState> list;
-                using (var stream = File.OpenRead(_logFileName)) {
-                    list = xml.Deserialize(stream) as List<PerformanceState>;
-                }
+                try {
+                    var xml = new XmlSerializer(typeof(List<PerformanceState>));
+                    List<PerformanceState> list;
+                    using (var stream = File.OpenRead(_logFileName)) {
+                        list = xml.Deserialize(stream) as List<PerformanceState>;
+                    }
 
-                // last 50 entrys
-                foreach (var entry in list.Skip(Math.Max(0, PerformanceStateList.Count() - 50))) {
-                    PerformanceStateList.Add(entry);
+                    // last 50 entrys
+                    foreach (var entry in list.Skip(Math.Max(0, PerformanceStateList.Count() - 50))) {
+                        PerformanceStateList.Add(entry);
+                    }
+                }
+                catch {
+                    File.Move(_logFileName, DateTime.Now.ToFileTimeUtc() + "-BrokenLogFile.xml");
                 }
             }
         }

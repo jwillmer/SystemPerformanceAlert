@@ -43,6 +43,13 @@ namespace PerformanceAlert {
             lock (_objLock) {
                 ProcessStatistics.ForEach(_ => _.Update());
                 ProcessStatistics.RemoveAll(_ => _.ProcessHasEnded);
+
+#if DEBUG
+                var ram = GetHighestRamProcess();
+                var cpu = GetHighestCpuProcess();
+                Debug.WriteLine(ram.Name + ";" + ram.Cpu + "%;" + ram.Ram  +"MB");
+                Debug.WriteLine(cpu.Name + ";" + cpu.Cpu + "%;" + cpu.Ram + "MB");
+#endif
             }
         }
 
@@ -71,7 +78,7 @@ namespace PerformanceAlert {
         }
 
         private void AddProcess(int processId, string processName) {
-            if(processId == 0) {
+            if(processId == 0 || processName == "Idle" || processName == "Memory Compression") {
                 return;
             }
 
@@ -82,7 +89,7 @@ namespace PerformanceAlert {
         public SystemUsage GetHighestRamProcess(int averageFromEntrys = 6) {
             if (!ProcessStatistics.Any()) return null;
 
-            var process = ProcessStatistics.OrderBy(_ => _.GetAverageRam(averageFromEntrys)).FirstOrDefault();
+            var process = ProcessStatistics.OrderByDescending(_ => _.GetAverageRam(averageFromEntrys)).FirstOrDefault();
             var ram = process.GetAverageRam(averageFromEntrys);
             var cpu = process.GetAverageCpu(averageFromEntrys);
 
@@ -92,7 +99,7 @@ namespace PerformanceAlert {
         public SystemUsage GetHighestCpuProcess(int averageFromEntrys = 6) {
             if (!ProcessStatistics.Any()) return null;
 
-            var process = ProcessStatistics.OrderBy(_ => _.GetAverageCpu(averageFromEntrys)).FirstOrDefault();
+            var process = ProcessStatistics.OrderByDescending(_ => _.GetAverageCpu(averageFromEntrys)).FirstOrDefault();
             var ram = process.GetAverageRam(averageFromEntrys);
             var cpu = process.GetAverageCpu(averageFromEntrys);
 
