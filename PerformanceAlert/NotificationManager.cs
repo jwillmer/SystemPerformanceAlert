@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 namespace PerformanceAlert {
     public class NotificationManager {
         public List<AlertDefinition> AlertDefinitions;
-        private ProcessMonitor ProcessMonitor;
+        private ProcessMonitor _processMonitor;
 
         private List<IPerformanceState> PerformanceStateList = new List<IPerformanceState>();
         private List<Report> Reports = new List<Report>();
 
         public NotificationManager(IEnumerable<AlertDefinition> alertDefinitions, ProcessMonitor processMonitor) {
             AlertDefinitions = alertDefinitions.ToList();
-            ProcessMonitor = processMonitor;
+            _processMonitor = processMonitor;
         }
 
         public void Update(IPerformanceState item) {
@@ -78,9 +78,9 @@ namespace PerformanceAlert {
 
                 SystemUsage usage;
                 if (CpuOverPeak(definition.AvergareCPU, averageCPU)) {
-                    usage = ProcessMonitor.GetHighestCpuProcess(interval);
+                    usage = _processMonitor.GetHighestCpuProcess(interval);
                 } else {
-                    usage = ProcessMonitor.GetHighestRamProcess(interval);
+                    usage = _processMonitor.GetHighestRamProcess(interval);
                 }
 
                 return "Process: " + usage.Name + " CPU: " + usage.Cpu + "% RAM: " + usage.Ram + "%" + Environment.NewLine;

@@ -28,7 +28,7 @@
       <Value Profile="(Default)">60</Value>
     </Setting>
     <Setting Name="MonitorProcesses" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

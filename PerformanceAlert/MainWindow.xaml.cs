@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,22 +25,26 @@ namespace PerformanceAlert {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private NotificationManager NotificationManager;
-        private ProcessMonitor ProcessMonitor;
+        private NotificationManager _notificationManager;
+        private ProcessMonitor _processMonitor;
 
-
+        private bool _hasElevatedPrivileges {
+            get {
+                return WindowsIdentity.GetCurrent().Owner.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid);
+            }
+        }
         public ObservableCollection<PerformanceState> PerformanceStateList { get; } = new ObservableCollection<PerformanceState>();
         public ObservableCollection<IDevice> Devices { get; } = new ObservableCollection<IDevice>();
 
         public Observable<bool> IsMonitoring { get; set; } = new Observable<bool>();
 
-        private bool HideInsteadOfClose = true;
+        private bool _hideInsteadOfClose = true;
 
-        private System.Windows.Forms.NotifyIcon SystemTrayIcon = new System.Windows.Forms.NotifyIcon();
+        private System.Windows.Forms.NotifyIcon _systemTrayIcon = new System.Windows.Forms.NotifyIcon();
 
-        private int MeasurementTimeInterval { get { return Settings.Default.AlertMeasurementTime; } }
+        private int _measurementTimeInterval { get { return Settings.Default.AlertMeasurementTime; } }
 
-        private readonly string LogFileName = "PerformanceMonitorLog.xml";
+        private readonly string _logFileName = "PerformanceMonitorLog.xml";
 
         public MainWindow() {
             InitializeComponent();
@@ -63,7 +68,17 @@ namespace PerformanceAlert {
         }
 
         private void InitProcessMonitor() {
-            ProcessMonitor = new ProcessMonitor();
+            _processMonitor = new ProcessMonitor();
+
+            if (_hasElevatedPrivileges) {
+                MonitorProcessCxb.IsEnabled = true;
+                MonitorProcessCxb.Visibility = Visibility.Visible;
+                MonitorProcessInfoTxtBox.Visibility = Visibility.Collapsed;
+
+                if (Settings.Default.MonitorProcesses) {
+                    ChangeProcessMonitorState(true);
+                }
+            }           
         }
 
         private void InitNotificationManager() {
@@ -74,14 +89,14 @@ namespace PerformanceAlert {
             definition.AvergareRAM = Settings.Default.AlertAvergareRAM;
             definition.MeasurementTime = Settings.Default.AlertMeasurementTime;
 
-            NotificationManager = new NotificationManager(new[] { definition }, ProcessMonitor);
+            _notificationManager = new NotificationManager(new[] { definition }, _processMonitor);
         }
 
         private void InitSettingsMonitoring() {
             IsMonitoring.Value = AllSettingsValid();
 
             Settings.Default.PropertyChanged += (settings, e) => {
-                var alertDefinition = NotificationManager.AlertDefinitions.First();
+                var alertDefinition = _notificationManager.AlertDefinitions.First();
                 var value = settings.GetType().GetProperty(e.PropertyName).GetValue(settings, null);
 
                 switch (e.PropertyName) {
@@ -99,6 +114,7 @@ namespace PerformanceAlert {
                         break;
                     case "MonitorProcesses":
                         alertDefinition.IncludeProcess = (bool)value;
+                        ChangeProcessMonitorState((bool)value);
                         break;
                 }
 
@@ -108,17 +124,17 @@ namespace PerformanceAlert {
 
         private void InitSystemTrayIcon() {
             Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PerformanceMonitoringAlerts;component/monitor.ico")).Stream;
-            SystemTrayIcon.Icon = new System.Drawing.Icon(iconStream);
-            SystemTrayIcon.Visible = true;
+            _systemTrayIcon.Icon = new System.Drawing.Icon(iconStream);
+            _systemTrayIcon.Visible = true;
 
-            SystemTrayIcon.BalloonTipTitle = "Application Hidden";
-            SystemTrayIcon.BalloonTipText = "Use the context menu of the application in the task bar notification area to close it.";
-            SystemTrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            _systemTrayIcon.BalloonTipTitle = "Application Hidden";
+            _systemTrayIcon.BalloonTipText = "Use the context menu of the application in the task bar notification area to close it.";
+            _systemTrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
 
-            SystemTrayIcon.MouseDoubleClick += (s, e) => ShowWindow();
-            SystemTrayIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
-            SystemTrayIcon.ContextMenu.MenuItems.Add("Exit", (s, e) => CloseWindow());
-            SystemTrayIcon.ContextMenu.MenuItems.Add("Open", (s, e) => ShowWindow());
+            _systemTrayIcon.MouseDoubleClick += (s, e) => ShowWindow();
+            _systemTrayIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
+            _systemTrayIcon.ContextMenu.MenuItems.Add("Exit", (s, e) => CloseWindow());
+            _systemTrayIcon.ContextMenu.MenuItems.Add("Open", (s, e) => ShowWindow());
 
             if (AllSettingsValid() && Settings.Default.StartMinimized) {
                 // start minimized
@@ -142,10 +158,10 @@ namespace PerformanceAlert {
         }
 
         private void InitLogMessages() {
-            if (File.Exists(LogFileName)) {
+            if (File.Exists(_logFileName)) {
                 var xml = new XmlSerializer(typeof(List<PerformanceState>));
                 List<PerformanceState> list;
-                using (var stream = File.OpenRead(LogFileName)) {
+                using (var stream = File.OpenRead(_logFileName)) {
                     list = xml.Deserialize(stream) as List<PerformanceState>;
                 }
 
@@ -157,23 +173,39 @@ namespace PerformanceAlert {
         }
 
         private void Counter_Monitoring(object sender, EventArgs e) {
-          
+
         }
 
         private void Counter_Update(object sender, EventArgs e) {
-            if (Settings.Default.MonitorProcesses) {
-                // only get it once a minute since it is CPU intensive
-                ProcessMonitor.UpdateProcessStatistics();
-            }
-
             Application.Current.Dispatcher.BeginInvoke(new Action(() => {
                 var state = e as PerformanceMonitorUpdateEvent;
                 var entry = Model.PerformanceState.FromPerformanceMonitorUpdateEvent(state);
 
                 UpdateGuiLogPreview(entry);
                 UpdateXmlLog();
-                NotificationManager.Update(entry);
-        }));
+                _notificationManager.Update(entry);
+            }));
+        }
+
+        private void ChangeProcessMonitorState(bool? isRunning = null) {
+            if (!_hasElevatedPrivileges) {
+                _processMonitor.Stop();
+            }
+            else if (isRunning.HasValue && isRunning == _processMonitor.IsRunning) {
+                return;
+            }
+            else if (isRunning.HasValue && isRunning.Value) {
+                _processMonitor.Start();
+            }
+            else if (isRunning.HasValue && !isRunning.Value) {
+                _processMonitor.Stop();
+            }
+            else if (_processMonitor.IsRunning) {
+                _processMonitor.Stop();
+            }
+            else {
+                _processMonitor.Start();
+            }
         }
 
         #region Handle Window State
@@ -181,7 +213,7 @@ namespace PerformanceAlert {
         private void HideWindow() {
             this.ShowInTaskbar = false;
             this.Hide();
-            SystemTrayIcon.ShowBalloonTip(400);
+            _systemTrayIcon.ShowBalloonTip(400);
         }
 
         private void ShowWindow() {
@@ -190,12 +222,12 @@ namespace PerformanceAlert {
         }
 
         private void CloseWindow() {
-            HideInsteadOfClose = false;
+            _hideInsteadOfClose = false;
             this.Close();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
-            if (HideInsteadOfClose) {
+            if (_hideInsteadOfClose) {
                 e.Cancel = true;
                 HideWindow();
             }
@@ -240,7 +272,7 @@ namespace PerformanceAlert {
         #region Device list interactions
 
         private void GetDeviceList(object sender = null, RoutedEventArgs e = null) {
-            var definition = NotificationManager.AlertDefinitions.First();
+            var definition = _notificationManager.AlertDefinitions.First();
             var devices = definition.NotificationProvider.GetDeviceList();
 
             if (devices == null) { return; }
@@ -286,12 +318,12 @@ namespace PerformanceAlert {
         #endregion
 
         private bool AllSettingsValid() {
-            var interval = MeasurementTimeInterval;
+            var interval = _measurementTimeInterval;
             if (interval <= 0) return false;
             if (string.IsNullOrWhiteSpace(Settings.Default.PushbulletApiKey)) return false;
             if (Settings.Default.SelectedDevices.Count <= 0) return false;
 
-            var notificationprovider = NotificationManager.AlertDefinitions.First().NotificationProvider;
+            var notificationprovider = _notificationManager.AlertDefinitions.First().NotificationProvider;
             if (!notificationprovider.SetApiKey(Settings.Default.PushbulletApiKey)) return false;
 
             return true;
@@ -300,7 +332,7 @@ namespace PerformanceAlert {
         private void UpdateXmlLog() {
             if (Settings.Default.WriteLogToDisk) {
                 var xml = new XmlSerializer(typeof(List<PerformanceState>));
-                using (var stream = File.Open(LogFileName, FileMode.OpenOrCreate)) {
+                using (var stream = File.Open(_logFileName, FileMode.OpenOrCreate)) {
                     xml.Serialize(stream, PerformanceStateList.ToList());
                 }
             }
@@ -309,7 +341,7 @@ namespace PerformanceAlert {
         private void UpdateGuiLogPreview(PerformanceState state) {
             PerformanceStateList.Add(state);
 
-            if (PerformanceStateList.Count > 50 && PerformanceStateList.Count > MeasurementTimeInterval) {
+            if (PerformanceStateList.Count > 50 && PerformanceStateList.Count > _measurementTimeInterval) {
                 // keep the GUI list small
                 PerformanceStateList.RemoveAt(0);
             }
@@ -320,7 +352,7 @@ namespace PerformanceAlert {
         }
 
         private void SetSelectedDevicesToAlertDefinition(IEnumerable<IDevice> devices) {
-            var alertDefinition = NotificationManager.AlertDefinitions.First();
+            var alertDefinition = _notificationManager.AlertDefinitions.First();
             var deviceIds = alertDefinition.NotifyDeviceIds;
             deviceIds.Clear();
 

@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace PerformanceAlert.Model {
     public class ProcessStatistics {
-        public bool ProcessHasExited { get; private set; }
+
+        public bool ProcessHasEnded { get; private set; }
 
         public int Id { get; private set; }
 
@@ -16,18 +17,11 @@ namespace PerformanceAlert.Model {
 
         public List<SystemUsage> Stats = new List<SystemUsage>();
 
-        public Process Process { get; private set; }
+        private DateTime _lastMeasurement = DateTime.Now;
 
-        public ProcessStatistics(Process process) {
-            Process = process;
-            Id = process.Id;
-            Name = process.ProcessName;
-
-            process.Exited += Process_Exited;
-        }
-
-        private void Process_Exited(object sender, EventArgs e) {
-            ProcessHasExited = true;
+        public ProcessStatistics(int processId, string name) {
+            Id = processId;
+            Name = name;
         }
 
         public float GetAverageCpu(int averageFrom = 6) {
@@ -41,20 +35,42 @@ namespace PerformanceAlert.Model {
         }
 
         public void Update() {
-            var ram = GetProcessRamUsageMb();
-            var cpu = GetProcessCpuUsage();
-            Stats.Add(new SystemUsage(Id, Name, cpu, ram));
+            try {
+
+                // Reduce CPU load by PerformanceCounter or WMI 
+                // Get - WmiObject - Class:Win32_Process | Where {$_.ProcessName - eq "System Idle Process"} | select - Property:ProcessName,WorkingSetSize - First:1
+
+
+                using (var process = Process.GetProcessById(Id)) {
+                    var ram = GetProcessRamUsageMb(process);
+                    var cpu = GetProcessCpuUsage(process);
+                    Stats.Add(new SystemUsage(Id, Name, cpu, ram));
+                }
+            }
+            catch {
+                ProcessHasEnded = true;
+            }
         }
 
-        private float GetProcessRamUsageMb() {
-            return (Process.WorkingSet64 / 1024 / 1024);
+        private float GetProcessRamUsageMb(Process process) {
+            return (process.WorkingSet64 / 1024 / 1024);
         }
 
-        private float GetProcessCpuUsage() {
-
-            // ToDo get cpu without perf. monitor to save ressources
-
-            return 0;
+        private float GetProcessCpuUsage(Process process) {
+            if (_lastMeasurement != null) {
+                DateTime last = _lastMeasurement;
+                _lastMeasurement = DateTime.Now;
+                return GetAverageCPULoad(process, last, _lastMeasurement);
+            }
+            else {
+                _lastMeasurement = DateTime.Now;
+                return 0;
+            }
+        }
+        private float GetAverageCPULoad(Process process, DateTime from, DateTime to) {
+            TimeSpan lifeInterval = (to - from);
+            float CPULoad = (float)(process.TotalProcessorTime.TotalMilliseconds / lifeInterval.TotalMilliseconds) * 100;
+            return CPULoad / Environment.ProcessorCount;
         }
     }
 }
