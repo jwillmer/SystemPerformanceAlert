@@ -149,7 +149,7 @@ namespace PerformanceAlert {
             Devices.Clear();
 
             foreach (var json in Settings.Default.SelectedDevices) {
-                var device = JsonConvert.DeserializeObject<Device>(json);
+                var device = JsonConvert.DeserializeObject<GenericDevice>(json);
                 Devices.Add(device as IDevice);
             }
 

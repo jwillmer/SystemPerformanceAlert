@@ -23,6 +23,7 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="Settings">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <GroupBox Header="Alert Definition">
                         <Grid>
@@ -96,6 +97,7 @@
                     </GroupBox>
 
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
         <ProgressBar Grid.Row="1" Margin="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsIndeterminate="{Binding Path=IsMonitoring.Value}" />
