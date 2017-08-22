@@ -89,7 +89,7 @@
                             <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.StartMinimized, Mode=TwoWay}"/>
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Run on system start" Margin="0,0,0,4"/>
                             <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.RunOnSystemStart, Mode=TwoWay}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Monitor Processes" Margin="0,0,0,4"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Monitor Processes" Margin="0,0,0,4"  ToolTip="This option adds the process with the highest CPU/RAM to the notification."/>
                             <TextBlock Grid.Row="3" Grid.Column="1" x:Name="MonitorProcessInfoTxtBox" Grid.ColumnSpan="2" Text="Start the application with elevated privileges to activate." Margin="0,0,0,4"/>
                             <CheckBox Grid.Row="3" Grid.Column="1" x:Name="MonitorProcessCxb" Visibility="Collapsed" IsEnabled="False" IsChecked="{Binding Source={StaticResource Settings}, Path=Default.MonitorProcesses, Mode=TwoWay}"/>
                         </Grid>
