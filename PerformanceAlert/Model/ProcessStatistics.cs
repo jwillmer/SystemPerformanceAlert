@@ -27,12 +27,18 @@ namespace PerformanceAlert.Model {
             Id = processId;
             Name = name;
 
-            try {
-                _process = Process.GetProcessById(Id);
-                _totalProcessorTime = _process.TotalProcessorTime.TotalMilliseconds;
+            var procList = Process.GetProcessesByName(name);
+            if (procList.Length == 0 || !procList.Select(_ => _.Id == processId).Any()) {
+                ProcessHasEnded = true;
             }
-            catch {
-                  ProcessHasEnded = true;
+            else {
+                try {
+                    _process = procList.First(_ => _.Id == processId);
+                    _totalProcessorTime = _process.TotalProcessorTime.TotalMilliseconds;
+                }
+                catch {
+                    ProcessHasEnded = true;
+                }
             }
         }
 
@@ -50,9 +56,13 @@ namespace PerformanceAlert.Model {
 
         public void Update() {
             try {
+                if (_process != null && _process.Id != 0) {   
                     var ram = GetProcessRamUsageMb(_process);
                     var cpu = GetProcessCpuUsage(_process);
                     Stats.Add(new SystemUsage(Id, Name, cpu, ram));
+                }else {
+                    ProcessHasEnded = true;
+                }
             }
             catch {
                 ProcessHasEnded = true;
